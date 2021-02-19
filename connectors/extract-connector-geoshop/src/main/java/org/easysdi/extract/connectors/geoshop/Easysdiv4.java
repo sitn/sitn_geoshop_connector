@@ -1305,6 +1305,8 @@ public class Easysdiv4 implements IConnector {
 
                 final JSONObject productNode = productsArray.getJSONObject(productIndex).getJSONObject("product");
                 final String productLabel = productNode.getString("label");
+                final String productOrganism = productNode.getString("provider");
+                final int catalogProductId = productNode.getInt("id");
 
                 product.setOrderGuid(String.valueOf(orderId));
                 product.setOrderLabel(orderLabel);
@@ -1316,8 +1318,12 @@ public class Easysdiv4 implements IConnector {
                 product.setTiersDetails(tiersAddress);
                 product.setProductGuid(String.valueOf(productId));
                 product.setProductLabel(productLabel);
-                product.setOthersParameters("{\"data_format\" : \"" + productsArray.getJSONObject(productIndex)
-                        .getString("data_format") + "\",\n" + "\"order_type\" : \"" + orderType + "\"}");
+                product.setOrganism(productOrganism);
+                product.setOthersParameters(
+                    "{\"data_format\" : \"" +
+                    productsArray.getJSONObject(productIndex).getString("data_format") + "\",\n" +
+                    "\"order_type\" : \"" + orderType + "\",\n" +
+                    "\"product_id\" : " + String.valueOf(catalogProductId) + "}");
                 product.setPerimeter(orderNode.getString("geom"));
                 product.setSurface(orderNode.getDouble("geom_area"));
 
