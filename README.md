@@ -9,6 +9,8 @@ Le code source a été compilé avec NetBeans 8.1 dans un environnement Linux. *
 
 Le logiciel NetBeans 8.1 version Linux est requis, il est téléchargeable sur la page suivante : https://netbeans.org/community/releases/81/
 
+Il faut également installer une nouvelle version de maven et la référencer dans les options de netbeans (Java > Maven) car les dépôts maven n'acceptent plus les requêtes non-https.
+
 ## Importer le code dans NetBeans
 
 1. Télécharger le zip correspondant au code source. Le zip doit contenir les deux dossiers **connectors** et **plugin-interface**
@@ -28,11 +30,12 @@ Le logiciel NetBeans 8.1 version Linux est requis, il est téléchargeable sur l
 
 ## Compiler le code source
 
-1. Vérifier les propriétés de chacun des deux projet, en accédant aux propriétés (Clic droit -> Properties)
+1. Vérifier les propriétés de chacun des deux projets, en accédant aux propriétés (Clic droit -> Properties)
     - Catégorie General : modifier si besoin la version  
     - Categorie Build>Compile : choisir la plateforme JAVA JDK 1.7
 
-2.  Compiler le projet extract-connector-geoshop :
+2.  Compiler les deux projets extract-interface et extract-connector-geoshop :
+    - Depuis l'onglet files
     - clic droit -> Build With Dependencies (les tests unitaires sont exécutés en même temps)
     - Le fichier jar compilé est généré dans un sous-répertoire **target** du dossier **extract-connector-geoshop** (ex : /home/neuchatel/projects/geoshop/target/extract-connector-geoshop-1.2-RELEASE.jar)
 
