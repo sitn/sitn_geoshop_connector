@@ -1310,7 +1310,8 @@ public class Easysdiv4 implements IConnector {
 
                 product.setOrderGuid(String.valueOf(orderId));
                 product.setOrderLabel(orderLabel);
-                product.setOrganism(organism);
+                product.setOrganism(productOrganism);
+                product.setOrganismGuid(productOrganism);
                 product.setClient(clientName);
                 product.setClientGuid(String.valueOf(clientId));
                 product.setClientDetails(clientAddress);
@@ -1318,7 +1319,6 @@ public class Easysdiv4 implements IConnector {
                 product.setTiersDetails(tiersAddress);
                 product.setProductGuid(String.valueOf(productId));
                 product.setProductLabel(productLabel);
-                product.setOrganism(productOrganism);
                 product.setOthersParameters(
                     "{\"data_format\" : \"" +
                     productsArray.getJSONObject(productIndex).getString("data_format") + "\",\n" +
