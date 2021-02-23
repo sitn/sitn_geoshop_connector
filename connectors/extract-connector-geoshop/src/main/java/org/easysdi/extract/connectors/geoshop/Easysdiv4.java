@@ -25,40 +25,25 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.io.StringWriter;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
-import org.apache.http.client.AuthCache;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -66,12 +51,9 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.impl.auth.BasicScheme;
-import org.apache.http.impl.client.BasicAuthCache;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -84,10 +66,6 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 
 
 
@@ -127,16 +105,6 @@ public class Easysdiv4 implements IConnector {
      * The port that is used by default for secure HTTP requests.
      */
     private static final int DEFAULT_HTTPS_PORT = 443;
-
-    /**
-     * The ASCII code of the last character that does not represent a symbol.
-     */
-    private static final int LAST_CONTROL_CHARACTER_CODE = 32;
-
-    /**
-     * The ASCII code of the last character in the standard character set.
-     */
-    private static final int LAST_STANDARD_ASCII_CHARACTER_CODE = 128;
 
     /**
      * The status code returned to tell that an HTTP request succeeded.
@@ -193,7 +161,7 @@ public class Easysdiv4 implements IConnector {
 
 
     /**
-     * Creates a new easySDI v4 connector plugin instance with the default user interface langauge.
+     * Creates a new easySDI v4 connector plugin instance with the default user interface language.
      *
      * @param parametersValues the parameters values to connect to the easySDI v4 server
      */
@@ -330,134 +298,6 @@ public class Easysdiv4 implements IConnector {
 
 
 
-    /**
-     * Obtains all the XML items that match an XPath expression.
-     *
-     * @param document the XML document to parse
-     * @param xmlPath  the XPath expression
-     * @return a node list that contains the found items
-     */
-    private NodeList getXMLNodeListFromXPath(final Document document, final String xmlPath) {
-
-        NodeList nodeList = null;
-        XPathFactory xPathfactory = XPathFactory.newInstance();
-        XPath xpath = xPathfactory.newXPath();
-
-        try {
-            XPathExpression expr = xpath.compile(xmlPath);
-            nodeList = (NodeList) expr.evaluate(document, XPathConstants.NODESET);
-        } catch (XPathExpressionException e) {
-            this.logger.error("Unable to retrieve xml node from xpath.", e);
-        }
-
-        return nodeList;
-    }
-
-
-
-    /**
-     * Gets the content of the first XML element that matches an XPath expression.
-     *
-     * @param document    the XML document to parse
-     * @param xpathString the XPath expression
-     * @return the text content of the first matching item, or an empty string if no element matches
-     */
-    private String getXMLNodeLabelFromXpath(final Document document, final String xpathString) {
-
-        try {
-            final XPathFactory xPathfactory = XPathFactory.newInstance();
-            final XPath xpath = xPathfactory.newXPath();
-            final XPathExpression expr = xpath.compile(xpathString);
-            final NodeList nodeList = (NodeList) expr.evaluate(document, XPathConstants.NODESET);
-
-            if (nodeList != null && nodeList.getLength() > 0) {
-                return nodeList.item(0).getTextContent();
-            }
-
-        } catch (XPathExpressionException exc) {
-            this.logger.error("The attribute {} could not be retrieved", xpathString);
-        }
-
-        return "";
-    }
-
-
-
-    /**
-     * Creates an address string from the content of an XML element.
-     *
-     * @param document    the XML document to parse
-     * @param xpathString the XPath expression that locates the element containing the address information
-     * @return the address string
-     */
-    private String buildAddressDetailsFromXpath(final Document document, final String xpathString) {
-
-        List<String> details = new ArrayList<>();
-
-        try {
-            final XPathFactory xPathfactory = XPathFactory.newInstance();
-            final XPath xpath = xPathfactory.newXPath();
-            final XPathExpression expr = xpath.compile(xpathString);
-            final NodeList nodeList = (NodeList) expr.evaluate(document, XPathConstants.NODESET);
-
-            if (nodeList != null && nodeList.getLength() > 0) {
-                final Element tierceAddressNode = (Element) nodeList.item(0);
-                final NodeList address1Node = tierceAddressNode.getElementsByTagName("sdi:addressstreet1");
-                final NodeList address2Node = tierceAddressNode.getElementsByTagName("sdi:addressstreet2");
-                final NodeList zipCodeNode = tierceAddressNode.getElementsByTagName("sdi:zip");
-                final NodeList localityNode = tierceAddressNode.getElementsByTagName("sdi:locality");
-
-                if (address1Node != null && address1Node.getLength() > 0) {
-                    final String address1Text = address1Node.item(0).getTextContent();
-
-                    if (StringUtils.isNotEmpty(address1Text)) {
-                        details.add(address1Text);
-                    }
-                }
-
-                if (address2Node != null && address2Node.getLength() > 0) {
-                    final String address2Text = address2Node.item(0).getTextContent();
-
-                    if (StringUtils.isNotEmpty(address2Text)) {
-                        details.add(address2Text);
-                    }
-                }
-
-                String zipCodeText = null;
-                String localityText = null;
-
-                if (zipCodeNode != null && zipCodeNode.getLength() > 0) {
-                    zipCodeText = zipCodeNode.item(0).getTextContent();
-                }
-
-                if (localityNode != null && localityNode.getLength() > 0) {
-                    localityText = localityNode.item(0).getTextContent();
-                }
-
-                if (StringUtils.isEmpty(zipCodeText)) {
-
-                    if (StringUtils.isNotEmpty(localityText)) {
-                        details.add(localityText);
-                    }
-
-                } else if (StringUtils.isEmpty(localityText)) {
-                    details.add(zipCodeText);
-
-                } else {
-                    details.add(String.format("%s %s", zipCodeText, localityText));
-                }
-
-            }
-
-        } catch (XPathExpressionException exc) {
-            this.logger.error("The tiers details could not be retrieved", exc);
-        }
-
-        return StringUtils.join(details, "\r\n");
-    }
-
-
-
     @Override
     public final IConnectorImportResult importCommands() {
         this.logger.debug("Importing commands");
@@ -466,7 +306,7 @@ public class Easysdiv4 implements IConnector {
 
         try {
             //call getOrder service
-            this.logger.debug("Fetching order XML from service");
+            this.logger.debug("Fetching orders from service");
             String tokenUrl = String.format("%s/%s", inputs.get(config.getProperty("code.serviceUrl")), config.getProperty("tokenEndPoint"));
             String targetUrl = String.format("%s/%s", inputs.get(config.getProperty("code.serviceUrl")), config.getProperty("getOrders.method"));
             result = this.callGetOrderService(
@@ -495,21 +335,9 @@ public class Easysdiv4 implements IConnector {
         this.logger.debug("Exporting result orders (setProduct method)");
 
         ExportResult exportResult = null;
-        String templatePath = null;
 
-        /*if (request.isRejected()) {
-            templatePath = config.getProperty("setProduct.rejection.filepath");
-
-        } else if (request.getStatus().equals("FINISHED")) {
-            templatePath = config.getProperty("setProduct.success.filepath");
-        }
-
-        this.logger.debug("use template xml {} for sending with setProduct", templatePath);
-         */
         File outputFile = null;
 
-        //Le fichier XML ne doit pas être fabriqué pour Geoshop
-        //final InputStream templateXMLStream = this.getClass().getClassLoader().getResourceAsStream(templatePath);
         try {
 
             if (!request.isRejected()) {
@@ -544,8 +372,6 @@ public class Easysdiv4 implements IConnector {
                     final String outputFileName = outputFile.getName();
                     this.logger.debug("set filename {}", outputFileName);
                 }
-                //final String escapedFileName = this.escapeExtendedCharactersForXml(outputFileName);
-                //((Element) firstChild).getElementsByTagName("sdi:filename").item(0).setTextContent(escapedFileName);
             }
 
             this.logger.debug("call setProduct");
@@ -553,8 +379,6 @@ public class Easysdiv4 implements IConnector {
             String tokenUrl = String.format("%s/%s", inputs.get(config.getProperty("code.serviceUrl")), config.getProperty("tokenEndPoint"));
             String exportUrl = String.format("%s/%s%s", inputs.get(config.getProperty("code.serviceUrl")), config.getProperty("setProduct.method"), request.getProductGuid());
 
-            //final String exportUrl = String.format("%s.%s", inputs.get(config.getProperty("code.serviceUrl")),
-            //        config.getProperty("setProduct.method"));
             exportResult = this.callSetProductService(tokenUrl, exportUrl, inputs.get(config.getProperty("code.login")),
                     inputs.get(config.getProperty("code.password")), outputFile, request);
 
@@ -598,9 +422,6 @@ public class Easysdiv4 implements IConnector {
             final String password, final File resultFile, IExportRequest request) {
 
         try {
-            //final String xmlString = this.createExportXmlString(xmlDocument).replaceAll("\\r", StringUtils.EMPTY);
-            //this.logger.debug("Sent XML:\n{}", xmlString);
-
             final URI targetUri = new URI(url);
             final URI tokenUri = new URI(tokenUrl);
             final HttpHost targetServer = this.getHostFromUri(targetUri);
@@ -622,32 +443,6 @@ public class Easysdiv4 implements IConnector {
 
 
     /**
-     * Converts an XML export document to a string.
-     *
-     * @param xmlDocument the XML document to convert
-     * @return the XML string
-     * @throws TransformerException the document could be converted from XML to string
-     * @throws IOException          the XML string could not be written
-     */
-    private String createExportXmlString(final Document xmlDocument) throws TransformerException, IOException {
-        DOMSource domSource = new DOMSource(xmlDocument);
-        Transformer transformer = TransformerFactory.newInstance().newTransformer();
-        transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "no");
-        transformer.setOutputProperty(OutputKeys.METHOD, "xml");
-        transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-        transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
-
-        try (StringWriter writer = new StringWriter()) {
-            StreamResult transformResult = new StreamResult(writer);
-            transformer.transform(domSource, transformResult);
-
-            return writer.toString();
-        }
-    }
-
-
-
-    /**
      * Sends the export data to the server.
      *
      * @param targetServer the host to send the data to
@@ -658,12 +453,10 @@ public class Easysdiv4 implements IConnector {
      * @param resultFile   the file generated by the request processing
      * @return the file generated by the processing
      * @throws IOException                  the plugin could not communicate with the server
-     * @throws SAXException                 the response from the server could not be parsed
-     * @throws ParserConfigurationException the response parser could not be instantiated
      */
     private ExportResult sendExportRequest(final HttpHost targetServer, final URI tokenUri, final URI targetUri, final String login,
             final String password, final File resultFile, IExportRequest request)
-            throws IOException, SAXException, ParserConfigurationException {
+            throws IOException {
 
         String token = null;
 
@@ -685,9 +478,10 @@ public class Easysdiv4 implements IConnector {
             }
 
             //Ajout des paramètres au body avant l'envoi de la requête
-            entityBuilder.addTextBody(this.messages.getString("api.param.is_rejected"), String.valueOf(request.isRejected()));
+            entityBuilder.addTextBody(this.messages.getString("api.param.is_rejected"),
+                    ObjectUtils.firstNonNull(String.valueOf(request.isRejected()), "false"));
             entityBuilder.addTextBody(this.messages.getString("api.param.comment"),
-                    request.getRemark(),
+                    ObjectUtils.firstNonNull(request.getRemark(), ""),
                     ContentType.create("text/plain", Charset.forName("UTF-8")));
             entityBuilder.setContentType(ContentType.MULTIPART_FORM_DATA);
 
@@ -709,39 +503,14 @@ public class Easysdiv4 implements IConnector {
 
 
     /**
-     * Creates the content of the HTTP export request with the description document and the result file.
-     *
-     * @param exportXml  the XML document that describes the result of the request processing
-     * @param resultFile the file that contains the generated data for the request
-     * @return the HTTP entity to export
-     */
-    private HttpEntity buildExportEntity(final String exportXml, final File resultFile) {
-        MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
-        entityBuilder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
-        entityBuilder.setCharset(StandardCharsets.UTF_8);
-        entityBuilder.addTextBody("xml", exportXml, ContentType.TEXT_XML);
-
-        if (resultFile != null) {
-            entityBuilder.addBinaryBody("file", resultFile);
-        }
-
-        entityBuilder.setContentType(ContentType.MULTIPART_FORM_DATA);
-        return entityBuilder.build();
-    }
-
-
-
-    /**
      * Processes what the server sent back as a response to an export request.
      *
      * @param response the response from the server
      * @return the parsed result of the export
      * @throws IOException                  the response from the server could not be read
-     * @throws SAXException                 the response from the server could not be parsed
-     * @throws ParserConfigurationException the response parser could not be instantiated
      */
     private ExportResult parseExportResponse(final HttpResponse response, final IExportRequest request)
-            throws IOException, SAXException, ParserConfigurationException {
+            throws IOException {
 
         final int httpCode = response.getStatusLine().getStatusCode();
         final String httpMessage = this.getMessageFromHttpCode(httpCode);
@@ -749,7 +518,6 @@ public class Easysdiv4 implements IConnector {
 
         ExportResult exportResult = new ExportResult();
         String responseString = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
-        //JSONObject responseJSON = new JSONObject(responseString);
 
         if (httpCode != Easysdiv4.ACCEPTED_HTTP_STATUS_CODE && httpCode != Easysdiv4.CREATED_HTTP_STATUS_CODE && httpCode != Easysdiv4.SUCCESS_HTTP_STATUS_CODE) {
             this.logger.debug("setProduct has failed with HTTP code {} => return directly output", httpCode);
@@ -766,28 +534,6 @@ public class Easysdiv4 implements IConnector {
         if (responseString.equals("") || responseString == null) {
             exportResult.setResultMessage(request.getRemark());
         }
-
-        /* L'API retourne toujours un résultat vide
-        if (!"".equals(responseString)) {
-            exportResult.setSuccess(true);
-            exportResult.setResultMessage(responseString);
-
-        } else {
-            exportResult.setSuccess(false);
-            exportResult.setResultMessage(this.messages.getString("importorders.result.xmlempty"));
-         0
-        }*/
-
- /*
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        Document document = builder.parse(new InputSource(response.getEntity().getContent()));
-        Node firstChild = document.getFirstChild();
-
-        NodeList codeNodeList = document.getElementsByTagName(config.getProperty("setProductResult.node.code"));
-        NodeList messageNodeList = document.getElementsByTagName(config.getProperty("setProductResult.node.message"));
-        NodeList detailsNodeList = document.getElementsByTagName(config.getProperty("setProductResult.node.details"));
-         */
         return exportResult;
     }
 
@@ -810,26 +556,10 @@ public class Easysdiv4 implements IConnector {
 
 
     /**
-     * Builds an HTTP request to be sent with the POST method, with proxy information if it is defined.
+     * Builds an HTTP request to be sent with the PUT method, with proxy information if it is defined.
      *
-     * @param url the address that the POST request must be sent to
-     * @return the HTTP POST request object
-     */
-    private HttpPost createPostRequest(final URI url) {
-        assert url != null : "The target url cannot be null.";
-
-        this.logger.debug("Creating HTTP GET request for URL {}.", url);
-
-        return (HttpPost) this.addProxyInfoToRequest(new HttpPost(url));
-    }
-
-
-
-    /**
-     * Builds an HTTP request to be sent with the POST method, with proxy information if it is defined.
-     *
-     * @param url the address that the POST request must be sent to
-     * @return the HTTP POST request object
+     * @param url the address that the PUT request must be sent to
+     * @return the HTTP PUT request object
      */
     private HttpPut createPutRequest(final URI url) {
         assert url != null : "The target url cannot be null.";
@@ -968,15 +698,12 @@ public class Easysdiv4 implements IConnector {
         MultipartEntityBuilder builder = MultipartEntityBuilder.create();
         builder.addTextBody("username", targetLogin);
         builder.addTextBody("password", targetPassword);
-        //builder.addBinaryBody(
-        //        "file", new File("test.txt"), ContentType.APPLICATION_OCTET_STREAM, "file.ext");
 
         HttpEntity multipart = builder.build();
         httpPost.setEntity(multipart);
 
         try {
             CloseableHttpResponse response = client.execute(httpPost);
-            //assertThat(response.getStatusLine().getStatusCode(), equalTo(200));
 
             String tokenResponse = webResponseToString(response);
             token = extractToken(tokenResponse, "access");
@@ -988,10 +715,6 @@ public class Easysdiv4 implements IConnector {
         }
 
         return token;
-
-        //HttpResponse<String> response = client.send(request,
-        //        HttpResponse.BodyHandlers.ofString());
-        //System.out.println(response.body());
     }
 
 
@@ -1155,12 +878,10 @@ public class Easysdiv4 implements IConnector {
      * @param password     the password to authenticate with the server
      * @return the result of the import
      * @throws IOException                  the plugin could not communicate with the server
-     * @throws SAXException                 the server response could not be parsed
-     * @throws ParserConfigurationException the response parser could not be configured
      */
     private ConnectorImportResult sendImportRequest(final HttpHost targetServer, final URI tokenUri, final URI targetUri,
             final String login, final String password)
-            throws IOException, SAXException, ParserConfigurationException {
+            throws IOException {
 
         String token = null;
 
@@ -1176,7 +897,6 @@ public class Easysdiv4 implements IConnector {
             httpGet.setHeader("Content-Type", "application/json");
             httpGet.setHeader("Authorization", "Bearer " + token);
 
-            //final HttpClientContext clientContext = this.getBasicAuthenticationContext(targetServer);
             this.logger.debug("Executing order HTTP request.");
 
             try (final CloseableHttpResponse response = client.execute(httpGet)) {
@@ -1188,34 +908,14 @@ public class Easysdiv4 implements IConnector {
 
 
     /**
-     * Obtains an HTTP context object that allows basic authentication with the easySDI v4 server.
-     *
-     * @param targetServer the HTTP host that represents the easySDI v4 server
-     * @return the HTTP client context
-     */
-    private HttpClientContext getBasicAuthenticationContext(final HttpHost targetServer) {
-        final AuthCache authenticationCache = new BasicAuthCache();
-        final BasicScheme basicAuthentication = new BasicScheme();
-        authenticationCache.put(targetServer, basicAuthentication);
-        final HttpClientContext clientContext = HttpClientContext.create();
-        clientContext.setAuthCache(authenticationCache);
-
-        return clientContext;
-    }
-
-
-
-    /**
      * Processes what the server returned as a response to an import request.
      *
      * @param response the response sent by the easySDI v4 server
      * @return the parsed import result
      * @throws IOException                  the response could not be read
-     * @throws SAXException                 the response could not be parsed
-     * @throws ParserConfigurationException the response parser could not be instantiated
      */
     private ConnectorImportResult parseImportResponse(final HttpResponse response)
-            throws IOException, SAXException, ParserConfigurationException {
+            throws IOException {
         //verify the valid error code first
         final ConnectorImportResult result = new ConnectorImportResult();
         final int httpCode = response.getStatusLine().getStatusCode();
@@ -1263,12 +963,10 @@ public class Easysdiv4 implements IConnector {
      * @param responseString the string that contains the import response from the server
      * @param result         the object that holds the processed result of the import request.
      * @return the import result object with the added product
-     * @throws SAXException                 the response could not be parsed
      * @throws IOException                  the response could not be read
-     * @throws ParserConfigurationException the response parser could not be instantiated
      */
     private ConnectorImportResult addImportedProductsToResult(final String responseString,
-            final ConnectorImportResult result) throws SAXException, IOException, ParserConfigurationException {
+            final ConnectorImportResult result) throws IOException {
 
         this.logger.debug("Building document");
 
@@ -1284,14 +982,20 @@ public class Easysdiv4 implements IConnector {
 
             JSONObject client = orderNode.getJSONObject("client");
             String clientName = client.getString("first_name") + " " + client.getString("last_name");
+            String clientOrganism = client.getString("company_name");
             int clientId = client.getInt("id");
-            String clientAddress = client.getString("street") + " " + client.getString("postcode") + " - " + client.getString("city") + " (" + client.getString("country") + ")";
-            String organism = client.getString("company_name");
+            String clientAddress = client.getString("street") + ", " + client.getString("postcode") + " " + client.getString("city");
 
-            JSONObject tiers = orderNode.getJSONObject("invoice_contact");
-            int tiersId = tiers.getInt("id");
-            String tiersName = tiers.getString("first_name") + " " + client.getString("last_name");
-            String tiersAddress = tiers.getString("street") + " " + tiers.getString("postcode") + " " + tiers.getString("city") + " (" + tiers.getString("country") + ")";
+            String tiersName = "";
+            String tiersAddress = "";
+            if (orderNode.isNull("invoice_contact") == false) {
+                JSONObject tiers = orderNode.getJSONObject("invoice_contact");
+                String tiersCompanyName = tiers.getString("company_name");
+                tiersCompanyName = (tiersCompanyName == null || tiersCompanyName.isEmpty()) ? "" : " (" + tiersCompanyName + ")";
+                tiersName = tiers.getString("first_name") + " " + tiers.getString("last_name")
+                	+ tiersCompanyName + " " + ObjectUtils.firstNonNull(tiers.getString("email"), tiers.getString("phone"));
+                tiersAddress = tiers.getString("street") + ", " + tiers.getString("postcode") + " " + tiers.getString("city");
+            }
 
             this.logger.debug("Parsing products.");
             JSONArray productsArray = orderNode.getJSONArray("items");
@@ -1305,18 +1009,19 @@ public class Easysdiv4 implements IConnector {
 
                 final JSONObject productNode = productsArray.getJSONObject(productIndex).getJSONObject("product");
                 final String productLabel = productNode.getString("label");
-                final String productOrganism = productNode.getString("provider");
+                
+                final String productOrganismGuid = productNode.getString("provider");
                 final int catalogProductId = productNode.getInt("id");
 
                 product.setOrderGuid(String.valueOf(orderId));
                 product.setOrderLabel(orderLabel);
-                product.setOrganism(productOrganism);
-                product.setOrganismGuid(productOrganism);
+                product.setOrganismGuid(productOrganismGuid);
+                product.setOrganism(clientOrganism);
                 product.setClient(clientName);
                 product.setClientGuid(String.valueOf(clientId));
-                product.setClientDetails(clientAddress);
-                product.setTiers(tiersName);
-                product.setTiersDetails(tiersAddress);
+                product.setClientDetails(StringUtils.strip(clientAddress, ", "));
+                product.setTiers(tiersName.trim());
+                product.setTiersDetails(StringUtils.strip(tiersAddress, ", "));
                 product.setProductGuid(String.valueOf(productId));
                 product.setProductLabel(productLabel);
                 product.setOthersParameters(
@@ -1332,124 +1037,7 @@ public class Easysdiv4 implements IConnector {
             }
 
         }
-
         return result;
-
-    }
-
-
-
-    private boolean checkOrderPerimeterType(Document document, String orderGuid) {
-        String perimeterType = this.getXMLNodeLabelFromXpath(document,
-                config.getProperty("getOrders.xpath.perimeterType").replace("<guid>", orderGuid));
-        this.logger.debug("The order perimeter type is \"{}\".", perimeterType);
-
-        return perimeterType != null
-                && perimeterType.equalsIgnoreCase(config.getProperty("getOrders.perimeterType.valid"));
-    }
-
-
-
-    private String getOrderPerimeterFromDocument(Document document, String orderGuid) {
-
-        if (!this.checkOrderPerimeterType(document, orderGuid)) {
-            this.logger.warn("The order perimeter type is not supported.");
-            return null;
-        }
-
-        return this.getXMLNodeLabelFromXpath(document, config.getProperty("getOrders.xpath.perimeter").replace("<guid>",
-                orderGuid));
-    }
-
-
-
-    /**
-     * Processes the custom settings for a data item request.
-     *
-     * @param propertiesNodeList the list of XML elements that contain the custom settings
-     * @return the custom settings as a JSON string
-     */
-    private String parseOtherParameters(final NodeList propertiesNodeList) {
-        ObjectMapper mapper = new ObjectMapper();
-        ObjectNode rootNode = mapper.createObjectNode();
-
-        for (int propertyIndex = 0; propertyIndex < propertiesNodeList.getLength(); propertyIndex++) {
-            this.logger.debug("Parsing product property index {}.", propertyIndex);
-            final Element propertyNode = (Element) propertiesNodeList.item(propertyIndex);
-            final NodeList propertyValues = propertyNode.getElementsByTagName("sdi:value");
-
-            final String alias = propertyNode.getAttribute("alias");
-            this.logger.debug("Property alias is {}.", alias);
-            final int valuesNumber = propertyValues.getLength();
-            this.logger.debug("The property has {} values.", valuesNumber);
-
-            if (valuesNumber == 0) {
-                continue;
-            }
-
-            if (valuesNumber == 1) {
-                rootNode.put(alias, propertyValues.item(0).getTextContent());
-                continue;
-            }
-
-            final ArrayNode valuesArray = rootNode.putArray(alias);
-
-            for (int valueIndex = 0; valueIndex < valuesNumber; valueIndex++) {
-                valuesArray.add(propertyValues.item(valueIndex).getTextContent());
-            }
-        }
-
-        try {
-            return mapper.writeValueAsString(rootNode);
-        } catch (JsonProcessingException exception) {
-            logger.error("An error occurred when the dynamic paremeters were converted to JSON.", exception);
-            return null;
-        }
-    }
-
-
-
-    /**
-     * Converts the extended characters (such as é or ð) and the control characters to XML entities.
-     *
-     * @param originalString the string to escape
-     * @return the escaped string
-     */
-    private String escapeExtendedCharactersForXml(final String originalString) {
-        return this.escapeExtendedCharactersForXml(originalString, false);
-    }
-
-
-
-    /**
-     * Converts the extended characters (such as é or ð) and optionally the control characters to XML
-     * entities.
-     *
-     * @param originalString     the string to escape
-     * @param ignoreControlChars <code>true</code> to leave the control characters (ASSCI code 32 or lower) as
-     *                           they are
-     * @return the escaped string
-     */
-    private String escapeExtendedCharactersForXml(final String originalString, final boolean ignoreControlChars) {
-        final int length = originalString.length();
-
-        StringBuilder escapedStringBuilder = new StringBuilder();
-
-        for (int offset = 0; offset < length;) {
-            final int codepoint = originalString.codePointAt(offset);
-
-            if (codepoint < Easysdiv4.LAST_STANDARD_ASCII_CHARACTER_CODE
-                    && (codepoint > Easysdiv4.LAST_CONTROL_CHARACTER_CODE || ignoreControlChars)) {
-                escapedStringBuilder.append(Character.toChars(codepoint));
-
-            } else {
-                escapedStringBuilder.append(String.format("&#%d;", codepoint));
-            }
-
-            offset += Character.charCount(codepoint);
-        }
-
-        return escapedStringBuilder.toString();
     }
 
 
@@ -1552,8 +1140,6 @@ public class Easysdiv4 implements IConnector {
                     + " output file with the name \"{}\"", outputFolderFileName, resultFileName);
             return Files.copy(outputFolderFile.toPath(), Paths.get(outputFolderPath, resultFileName)).toFile();
         }
-
         return ZipUtils.zipFolderContentToFile(outputFolder, this.getArchiveNameForRequest(request, true));
     }
-
 }
