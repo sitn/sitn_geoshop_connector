@@ -986,14 +986,15 @@ public class GeoshopSitn implements IConnector {
             this.logger.debug("Processing order index {}.", i);
             JSONObject orderNode = orderArray.getJSONObject(i);
             final int orderId = orderNode.getInt("id");
-            String orderLabel = orderNode.getString("title");
+            String orderLabel = String.valueOf(orderId) + " - " + orderNode.getString("title");
             String orderType = orderNode.getString("order_type");
 
             JSONObject client = orderNode.getJSONObject("client");
             String clientName = client.getString("first_name") + " " + client.getString("last_name");
             String clientOrganism = client.getString("company_name");
             int clientId = client.getInt("id");
-            String clientAddress = client.getString("street") + ", " + client.getString("postcode") + " " + client.getString("city");
+            String clientAddress = client.getString("street") + ", " + client.getString("postcode") + " " + client.getString("city")
+                + ", " + ObjectUtils.firstNonNull(client.getString("email"), client.getString("phone"));
 
             String tiersName = "";
             String tiersAddress = "";
@@ -1001,9 +1002,9 @@ public class GeoshopSitn implements IConnector {
                 JSONObject tiers = orderNode.getJSONObject("invoice_contact");
                 String tiersCompanyName = tiers.getString("company_name");
                 tiersCompanyName = (tiersCompanyName == null || tiersCompanyName.isEmpty()) ? "" : " (" + tiersCompanyName + ")";
-                tiersName = tiers.getString("first_name") + " " + tiers.getString("last_name")
-                	+ tiersCompanyName + " " + ObjectUtils.firstNonNull(tiers.getString("email"), tiers.getString("phone"));
-                tiersAddress = tiers.getString("street") + ", " + tiers.getString("postcode") + " " + tiers.getString("city");
+                tiersName = tiers.getString("first_name") + " " + tiers.getString("last_name");
+                tiersAddress = tiers.getString("street") + ", " + tiers.getString("postcode") + " " + tiers.getString("city")
+            	    + tiersCompanyName + " " + ObjectUtils.firstNonNull(tiers.getString("email"), tiers.getString("phone"));
             }
             String detailsUrl;
 
@@ -1097,7 +1098,7 @@ public class GeoshopSitn implements IConnector {
         assert request.getOrderLabel() != null : "The label of the exported order cannot be null.";
         assert request.getProductLabel() != null : "The label of the exported product cannot be null.";
 
-        final String baseFileName = String.format("%s_%s", request.getOrderLabel(), request.getProductLabel())
+        final String baseFileName = String.format("%s_%s", request.getOrderGuid(), request.getProductLabel())
                 .replaceAll("[\\s<>*\"/\\\\\\[\\]:;|=,]", "_");
         this.logger.debug("The raw base file name is {}", baseFileName);
         this.logger.debug("The bytes of the raw base file name is {}.", baseFileName.getBytes(StandardCharsets.UTF_8));
