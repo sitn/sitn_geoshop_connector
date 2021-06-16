@@ -44,11 +44,12 @@ import org.slf4j.LoggerFactory;
  *
  * @author Yves Grasset
  */
-public class Easysdiv4Test {
-    private static final String CONFIG_FILE_PATH = "connectors/easysdiv4/properties/config.properties";
+public class GeoshopSitnTest {
+    private static final String CONFIG_FILE_PATH = "connectors/geoshopsitn/properties/config.properties";
     private static final String DESCRIPTION_STRING_IDENTIFIER = "plugin.description";
     private static final String EXPECTED_ICON_CLASS = "";
     private static final String EXPECTED_PLUGIN_CODE = "geoshopextract";
+    private static final String DETAILS_URL_PARAMETER_NAME_PROPERTY = "code.detailsUrlPattern";
     private static final String HELP_STRING_IDENTIFIER = "plugin.help";
     private static final String INSTANCE_LANGUAGE = "fr";
     private static final String LABEL_STRING_IDENTIFIER = "plugin.label";
@@ -67,6 +68,7 @@ public class Easysdiv4Test {
     private static final String TEST_PASSWORD = "Arxit200";
     private static final String TEST_UPLOAD_SIZE = "1024";
     private static final String TEST_URL = "https://sitn.ne.ch/geoshop2_prepub_api";
+    private static final String TEST_DETAILS_URL = "https://sitn.ne.ch/geoshop2_prepub_api/admin/api/order/20118/change/";
     private static final String UPLOAD_SIZE_PARAMETER_NAME_PROPERTY = "code.uploadSize";
     private static final String URL_PARAMETER_NAME_PROPERTY = "code.serviceUrl";
     private static final String[] VALID_PARAMETER_TYPES = new String[]{"email", "pass", "multitext", "text", "numeric"};
@@ -74,7 +76,7 @@ public class Easysdiv4Test {
     /**
      * The writer to the application logs.
      */
-    private final Logger logger = LoggerFactory.getLogger(Easysdiv4Test.class);
+    private final Logger logger = LoggerFactory.getLogger(GeoshopSitnTest.class);
 
     private ConnectorConfig configuration;
     private LocalizedMessages messages;
@@ -84,7 +86,7 @@ public class Easysdiv4Test {
 
 
 
-    public Easysdiv4Test() {
+    public GeoshopSitnTest() {
     }
 
 
@@ -104,21 +106,24 @@ public class Easysdiv4Test {
 
     @Before
     public final void setUp() {
-        this.configuration = new ConnectorConfig(Easysdiv4Test.CONFIG_FILE_PATH);
-        this.messages = new LocalizedMessages(Easysdiv4Test.INSTANCE_LANGUAGE);
+        this.configuration = new ConnectorConfig(GeoshopSitnTest.CONFIG_FILE_PATH);
+        this.messages = new LocalizedMessages(GeoshopSitnTest.INSTANCE_LANGUAGE);
 
-        final String loginCode = this.configuration.getProperty(Easysdiv4Test.LOGIN_PARAMETER_NAME_PROPERTY);
-        final String passwordCode = this.configuration.getProperty(Easysdiv4Test.PASSWORD_PARAMETER_NAME_PROPERTY);
-        final String urlCode = this.configuration.getProperty(Easysdiv4Test.URL_PARAMETER_NAME_PROPERTY);
-        final String uploadSizeCode = this.configuration.getProperty(Easysdiv4Test.UPLOAD_SIZE_PARAMETER_NAME_PROPERTY);
+        final String loginCode = this.configuration.getProperty(GeoshopSitnTest.LOGIN_PARAMETER_NAME_PROPERTY);
+        final String passwordCode = this.configuration.getProperty(GeoshopSitnTest.PASSWORD_PARAMETER_NAME_PROPERTY);
+        final String urlCode = this.configuration.getProperty(GeoshopSitnTest.URL_PARAMETER_NAME_PROPERTY);
+        final String uploadSizeCode = this.configuration.getProperty(GeoshopSitnTest.UPLOAD_SIZE_PARAMETER_NAME_PROPERTY);
+        final String detailsUrlPattern
+        	= this.configuration.getProperty(GeoshopSitnTest.DETAILS_URL_PARAMETER_NAME_PROPERTY);
 
-        this.requiredParametersCodes = new String[]{loginCode, passwordCode, urlCode, uploadSizeCode};
+        this.requiredParametersCodes = new String[]{loginCode, passwordCode, urlCode, uploadSizeCode, detailsUrlPattern};
 
         this.testParameters = new HashMap<>();
-        this.testParameters.put(loginCode, Easysdiv4Test.TEST_LOGIN);
-        this.testParameters.put(passwordCode, Easysdiv4Test.TEST_PASSWORD);
-        this.testParameters.put(urlCode, Easysdiv4Test.TEST_URL);
-        this.testParameters.put(uploadSizeCode, Easysdiv4Test.TEST_UPLOAD_SIZE);
+        this.testParameters.put(loginCode, GeoshopSitnTest.TEST_LOGIN);
+        this.testParameters.put(passwordCode, GeoshopSitnTest.TEST_PASSWORD);
+        this.testParameters.put(urlCode, GeoshopSitnTest.TEST_URL);
+        this.testParameters.put(uploadSizeCode, GeoshopSitnTest.TEST_UPLOAD_SIZE);
+        this.testParameters.put(detailsUrlPattern, GeoshopSitnTest.TEST_DETAILS_URL);
 
         this.parameterMapper = new ObjectMapper();
     }
@@ -132,26 +137,26 @@ public class Easysdiv4Test {
 
 
     /**
-     * Test of newInstance method, of class Easysdiv4.
+     * Test of newInstance method, of class GeoshopSitnTest.
      */
     @Test
     public final void testNewInstanceWithoutParameters() {
         System.out.println("newInstance without parameters");
-        Easysdiv4 instance = new Easysdiv4();
-        Easysdiv4 result = instance.newInstance(Easysdiv4Test.INSTANCE_LANGUAGE);
+        GeoshopSitn instance = new GeoshopSitn();
+        GeoshopSitn result = instance.newInstance(GeoshopSitnTest.INSTANCE_LANGUAGE);
         Assert.assertNotSame(instance, result);
     }
 
 
 
     /**
-     * Test of newInstance method, of class Easysdiv4.
+     * Test of newInstance method, of class GeoshopSitn.
      */
     @Test
     public final void testNewInstanceWithParameters() {
         System.out.println("newInstance with parameters");
-        Easysdiv4 instance = new Easysdiv4();
-        Easysdiv4 result = instance.newInstance(Easysdiv4Test.INSTANCE_LANGUAGE, this.testParameters);
+        GeoshopSitn instance = new GeoshopSitn();
+        GeoshopSitn result = instance.newInstance(GeoshopSitnTest.INSTANCE_LANGUAGE, this.testParameters);
 
         System.out.println("import Commands");
 
@@ -160,13 +165,13 @@ public class Easysdiv4Test {
 
 
     /**
-     * Test of getLabel method, of class Easysdiv4.
+     * Test of getLabel method, of class GeoshopSitn.
      */
     @Test
     public final void testGetLabel() {
         System.out.println("getLabel");
-        Easysdiv4 instance = new Easysdiv4(Easysdiv4Test.INSTANCE_LANGUAGE);
-        String expResult = this.messages.getString(Easysdiv4Test.LABEL_STRING_IDENTIFIER);
+        GeoshopSitn instance = new GeoshopSitn(GeoshopSitnTest.INSTANCE_LANGUAGE);
+        String expResult = this.messages.getString(GeoshopSitnTest.LABEL_STRING_IDENTIFIER);
         String result = instance.getLabel();
         Assert.assertEquals(expResult, result);
     }
@@ -174,26 +179,26 @@ public class Easysdiv4Test {
 
 
     /**
-     * Test of getCode method, of class Easysdiv4.
+     * Test of getCode method, of class GeoshopSitn.
      */
     @Test
     public final void testGetCode() {
         System.out.println("getCode");
-        Easysdiv4 instance = new Easysdiv4();
+        GeoshopSitn instance = new GeoshopSitn();
         String result = instance.getCode();
-        Assert.assertEquals(Easysdiv4Test.EXPECTED_PLUGIN_CODE, result);
+        Assert.assertEquals(GeoshopSitnTest.EXPECTED_PLUGIN_CODE, result);
     }
 
 
 
     /**
-     * Test of getDescription method, of class Easysdiv4.
+     * Test of getDescription method, of class GeoshopSitn.
      */
     @Test
     public final void testGetDescription() {
         System.out.println("getDescription");
-        Easysdiv4 instance = new Easysdiv4(Easysdiv4Test.INSTANCE_LANGUAGE);
-        String expResult = this.messages.getString(Easysdiv4Test.DESCRIPTION_STRING_IDENTIFIER);
+        GeoshopSitn instance = new GeoshopSitn(GeoshopSitnTest.INSTANCE_LANGUAGE);
+        String expResult = this.messages.getString(GeoshopSitnTest.DESCRIPTION_STRING_IDENTIFIER);
         String result = instance.getDescription();
         Assert.assertEquals(expResult, result);
     }
@@ -201,13 +206,13 @@ public class Easysdiv4Test {
 
 
     /**
-     * Test of getHelp method, of class Easysdiv4.
+     * Test of getHelp method, of class GeoshopSitn.
      */
     @Test
     public final void testGetHelp() {
         System.out.println("getHelp");
-        Easysdiv4 instance = new Easysdiv4(Easysdiv4Test.INSTANCE_LANGUAGE);
-        String expResult = this.messages.getString(Easysdiv4Test.HELP_STRING_IDENTIFIER);
+        GeoshopSitn instance = new GeoshopSitn(GeoshopSitnTest.INSTANCE_LANGUAGE);
+        String expResult = this.messages.getString(GeoshopSitnTest.HELP_STRING_IDENTIFIER);
         String result = instance.getHelp();
         Assert.assertEquals(expResult, result);
     }
@@ -215,25 +220,25 @@ public class Easysdiv4Test {
 
 
     /**
-     * Test of getPicto method, of class Easysdiv4.
+     * Test of getPicto method, of class GeoshopSitn.
      */
     @Test
     public final void testGetPicto() {
         System.out.println("getPicto");
-        Easysdiv4 instance = new Easysdiv4();
+        GeoshopSitn instance = new GeoshopSitn();
         String result = instance.getPicto();
-        Assert.assertEquals(Easysdiv4Test.EXPECTED_ICON_CLASS, result);
+        Assert.assertEquals(GeoshopSitnTest.EXPECTED_ICON_CLASS, result);
     }
 
 
 
     /**
-     * Test of getParams method, of class Easysdiv4.
+     * Test of getParams method, of class GeoshopSitn.
      */
     @Test
     public final void testGetParams() {
         System.out.println("getParams");
-        Easysdiv4 instance = new Easysdiv4();
+        GeoshopSitn instance = new GeoshopSitn();
         ArrayNode parametersArray = null;
 
         try {
@@ -251,8 +256,8 @@ public class Easysdiv4Test {
         for (int parameterIndex = 0; parameterIndex < parametersArray.size(); parameterIndex++) {
             JsonNode parameterData = parametersArray.get(parameterIndex);
             Assert.assertTrue(String.format("The parameter #%d does not have a code property", parameterIndex),
-                    parameterData.hasNonNull(Easysdiv4Test.PARAMETER_CODE_NAME));
-            String parameterCode = parameterData.get(Easysdiv4Test.PARAMETER_CODE_NAME).textValue();
+                    parameterData.hasNonNull(GeoshopSitnTest.PARAMETER_CODE_NAME));
+            String parameterCode = parameterData.get(GeoshopSitnTest.PARAMETER_CODE_NAME).textValue();
             Assert.assertTrue(String.format("The code for parameter #%d is null or blank", parameterIndex),
                     StringUtils.isNotBlank(parameterCode));
             Assert.assertTrue(
@@ -262,36 +267,36 @@ public class Easysdiv4Test {
             requiredCodes.remove(parameterCode);
 
             Assert.assertTrue(String.format("The parameter %s does not have a label property", parameterCode),
-                    parameterData.hasNonNull(Easysdiv4Test.PARAMETER_LABEL_NAME));
-            String label = parameterData.get(Easysdiv4Test.PARAMETER_LABEL_NAME).textValue();
+                    parameterData.hasNonNull(GeoshopSitnTest.PARAMETER_LABEL_NAME));
+            String label = parameterData.get(GeoshopSitnTest.PARAMETER_LABEL_NAME).textValue();
             Assert.assertTrue(String.format("The label for parameter %s is null or blank.", parameterCode),
                     StringUtils.isNotBlank(label));
 
             Assert.assertTrue(String.format("The parameter %s does not have a type property", parameterCode),
-                    parameterData.hasNonNull(Easysdiv4Test.PARAMETER_TYPE_NAME));
-            String parameterType = parameterData.get(Easysdiv4Test.PARAMETER_TYPE_NAME).textValue();
+                    parameterData.hasNonNull(GeoshopSitnTest.PARAMETER_TYPE_NAME));
+            String parameterType = parameterData.get(GeoshopSitnTest.PARAMETER_TYPE_NAME).textValue();
             Assert.assertTrue(String.format("The type for parameter %s is invalid.", parameterCode),
                     StringUtils.isNotBlank(label)
-                    && ArrayUtils.contains(Easysdiv4Test.VALID_PARAMETER_TYPES, parameterType));
+                    && ArrayUtils.contains(GeoshopSitnTest.VALID_PARAMETER_TYPES, parameterType));
 
             Assert.assertTrue(String.format("The parameter %s does not have a required property", parameterCode),
-                    parameterData.hasNonNull(Easysdiv4Test.PARAMETER_REQUIRED_NAME));
+                    parameterData.hasNonNull(GeoshopSitnTest.PARAMETER_REQUIRED_NAME));
             Assert.assertTrue(String.format("The required field for the parameter %s is not a boolean", parameterCode),
-                    parameterData.get(Easysdiv4Test.PARAMETER_REQUIRED_NAME).isBoolean());
+                    parameterData.get(GeoshopSitnTest.PARAMETER_REQUIRED_NAME).isBoolean());
 
             if (parameterType.equals("numeric")) {
                 Integer maxValue = null;
 
-                if (parameterData.hasNonNull(Easysdiv4Test.PARAMETER_MAX_VALUE_NAME)) {
+                if (parameterData.hasNonNull(GeoshopSitnTest.PARAMETER_MAX_VALUE_NAME)) {
                     Assert.assertTrue(String.format("The maximum value for parameter %s is not a number",
-                            parameterCode), parameterData.get(Easysdiv4Test.PARAMETER_MAX_VALUE_NAME).isNumber());
-                    maxValue = parameterData.get(Easysdiv4Test.PARAMETER_MAX_VALUE_NAME).intValue();
+                            parameterCode), parameterData.get(GeoshopSitnTest.PARAMETER_MAX_VALUE_NAME).isNumber());
+                    maxValue = parameterData.get(GeoshopSitnTest.PARAMETER_MAX_VALUE_NAME).intValue();
                 }
 
-                if (parameterData.hasNonNull(Easysdiv4Test.PARAMETER_MIN_VALUE_NAME)) {
+                if (parameterData.hasNonNull(GeoshopSitnTest.PARAMETER_MIN_VALUE_NAME)) {
                     Assert.assertTrue(String.format("The minimum value for parameter %s is not an integer",
-                            parameterCode), parameterData.get(Easysdiv4Test.PARAMETER_MIN_VALUE_NAME).isInt());
-                    int minValue = parameterData.get(Easysdiv4Test.PARAMETER_MIN_VALUE_NAME).intValue();
+                            parameterCode), parameterData.get(GeoshopSitnTest.PARAMETER_MIN_VALUE_NAME).isInt());
+                    int minValue = parameterData.get(GeoshopSitnTest.PARAMETER_MIN_VALUE_NAME).intValue();
 
                     if (maxValue != null) {
                         Assert.assertTrue(
@@ -300,17 +305,17 @@ public class Easysdiv4Test {
                     }
                 }
 
-                if (parameterData.hasNonNull(Easysdiv4Test.PARAMETER_STEP_NAME)) {
+                if (parameterData.hasNonNull(GeoshopSitnTest.PARAMETER_STEP_NAME)) {
                     Assert.assertTrue(String.format("The step value for parameter %s is not an integer", parameterCode),
-                            parameterData.get(Easysdiv4Test.PARAMETER_STEP_NAME).isInt());
+                            parameterData.get(GeoshopSitnTest.PARAMETER_STEP_NAME).isInt());
                 }
 
             } else {
                 Assert.assertTrue(String.format("The parameter %s does not have a maximum length property", parameterCode),
-                        parameterData.hasNonNull(Easysdiv4Test.PARAMETER_MAX_LENGTH_NAME));
+                        parameterData.hasNonNull(GeoshopSitnTest.PARAMETER_MAX_LENGTH_NAME));
                 Assert.assertTrue(String.format("The maximum length for parameter %s is not an integer", parameterCode),
-                        parameterData.get(Easysdiv4Test.PARAMETER_MAX_LENGTH_NAME).isInt());
-                int maxLength = parameterData.get(Easysdiv4Test.PARAMETER_MAX_LENGTH_NAME).intValue();
+                        parameterData.get(GeoshopSitnTest.PARAMETER_MAX_LENGTH_NAME).isInt());
+                int maxLength = parameterData.get(GeoshopSitnTest.PARAMETER_MAX_LENGTH_NAME).intValue();
                 Assert.assertTrue(
                         String.format("The maximum length of parameter %s is not strictly positive", parameterCode),
                         maxLength > 0
@@ -327,14 +332,14 @@ public class Easysdiv4Test {
 
 
     /**
-     * Test of importCommands method, of class Easysdiv4.
+     * Test of importCommands method, of class GeoshopSitn.
      */
     @Test
     public final void testImportCommands() {
 
         System.out.println("newInstance with parameters");
-        Easysdiv4 instance = new Easysdiv4();
-        Easysdiv4 pluginInstance = instance.newInstance(Easysdiv4Test.INSTANCE_LANGUAGE, this.testParameters);
+        GeoshopSitn instance = new GeoshopSitn();
+        GeoshopSitn pluginInstance = instance.newInstance(GeoshopSitnTest.INSTANCE_LANGUAGE, this.testParameters);
         IConnectorImportResult result;
 
         /*result = pluginInstance.importCommands();
@@ -352,13 +357,13 @@ public class Easysdiv4Test {
 
 
     /**
-     * Test of exportResult method, of class Easysdiv4.
+     * Test of exportResult method, of class GeoshopSitn.
      */
     @Test
     public final void testExportResult() {
 
-        Easysdiv4 instance = new Easysdiv4();
-        Easysdiv4 pluginInstance = instance.newInstance(Easysdiv4Test.INSTANCE_LANGUAGE, this.testParameters);
+        GeoshopSitn instance = new GeoshopSitn();
+        GeoshopSitn pluginInstance = instance.newInstance(GeoshopSitnTest.INSTANCE_LANGUAGE, this.testParameters);
         ExportRequest request = new ExportRequest();
         //Données bouchons
         request.setClient("Jean Michoud");

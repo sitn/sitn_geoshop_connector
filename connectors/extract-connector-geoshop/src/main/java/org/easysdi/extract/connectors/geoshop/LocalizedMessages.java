@@ -50,7 +50,7 @@ public class LocalizedMessages {
      * A string with placeholders to build the relative path to the files that holds the strings localized
      * in the defined language.
      */
-    private static final String LOCALIZED_FILE_PATH_FORMAT = "connectors/easysdiv4/lang/%s/%s";
+    private static final String LOCALIZED_FILE_PATH_FORMAT = "connectors/geoshopsitn/lang/%s/%s";
 
     /**
      * The name of the file that holds the localized application strings.

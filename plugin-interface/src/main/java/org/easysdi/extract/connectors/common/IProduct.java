@@ -142,6 +142,15 @@ public interface IProduct {
     Double getSurface();
 
 
+    
+    /**
+     * Obtains the address that provides an access to the details of this order on the originating server.
+     *
+     * @return the URL of the order on the source server, or <code>null</code> if there is no such URL
+     */
+    String getExternalUrl();
+
+
 
     /**
      * Obtains custom settings about the order.
