@@ -1004,7 +1004,7 @@ public class GeoshopSitn implements IConnector {
                 tiersCompanyName = (tiersCompanyName == null || tiersCompanyName.isEmpty()) ? "" : " (" + tiersCompanyName + ")";
                 tiersName = tiers.getString("first_name") + " " + tiers.getString("last_name");
                 tiersAddress = tiers.getString("street") + ", " + tiers.getString("postcode") + " " + tiers.getString("city")
-            	    + tiersCompanyName + " " + ObjectUtils.firstNonNull(tiers.getString("email"), tiers.getString("phone"));
+                    + tiersCompanyName + " " + ObjectUtils.firstNonNull(tiers.getString("email"), tiers.getString("phone"));
             }
             String detailsUrl;
 
