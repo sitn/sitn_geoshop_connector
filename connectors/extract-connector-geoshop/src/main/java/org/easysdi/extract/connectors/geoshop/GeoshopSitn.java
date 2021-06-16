@@ -61,6 +61,7 @@ import org.apache.http.util.EntityUtils;
 import org.easysdi.extract.connectors.common.IConnector;
 import org.easysdi.extract.connectors.common.IConnectorImportResult;
 import org.easysdi.extract.connectors.common.IExportRequest;
+import org.easysdi.extract.connectors.geoshop.utils.RequestUtils;
 import org.easysdi.extract.connectors.geoshop.utils.ZipUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -70,16 +71,16 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * A plugin that imports orders from an easySDI v4 server and exports their result.
+ * A plugin that imports orders from an geoshop sitn server and exports their result.
  *
  * @author Florent Krin
  */
-public class Easysdiv4 implements IConnector {
+public class GeoshopSitn implements IConnector {
 
     /**
      * The path to the configuration of this plugin.
      */
-    private static final String CONFIG_FILE_PATH = "connectors/easysdiv4/properties/config.properties";
+    private static final String CONFIG_FILE_PATH = "connectors/geoshopsitn/properties/config.properties";
 
     /**
      * The status code returned to tell that an HTTP request resulted in the creation of a resource.
@@ -114,7 +115,7 @@ public class Easysdiv4 implements IConnector {
     /**
      * The writer to the application logs.
      */
-    private final Logger logger = LoggerFactory.getLogger(Easysdiv4.class);
+    private final Logger logger = LoggerFactory.getLogger(GeoshopSitn.class);
 
     /**
      * The code that uniquely identifies this plugin.
@@ -141,8 +142,8 @@ public class Easysdiv4 implements IConnector {
     /**
      * Creates a new easySDI v4 connector plugin instance with default parameters.
      */
-    public Easysdiv4() {
-        this.config = new ConnectorConfig(Easysdiv4.CONFIG_FILE_PATH);
+    public GeoshopSitn() {
+        this.config = new ConnectorConfig(GeoshopSitn.CONFIG_FILE_PATH);
         this.messages = new LocalizedMessages();
     }
 
@@ -153,8 +154,8 @@ public class Easysdiv4 implements IConnector {
      *
      * @param language the string that identifies the language used by the user interface
      */
-    public Easysdiv4(final String language) {
-        this.config = new ConnectorConfig(Easysdiv4.CONFIG_FILE_PATH);
+    public GeoshopSitn(final String language) {
+        this.config = new ConnectorConfig(GeoshopSitn.CONFIG_FILE_PATH);
         this.messages = new LocalizedMessages(language);
     }
 
@@ -165,7 +166,7 @@ public class Easysdiv4 implements IConnector {
      *
      * @param parametersValues the parameters values to connect to the easySDI v4 server
      */
-    public Easysdiv4(final Map<String, String> parametersValues) {
+    public GeoshopSitn(final Map<String, String> parametersValues) {
         this();
         this.inputs = parametersValues;
     }
@@ -178,7 +179,7 @@ public class Easysdiv4 implements IConnector {
      * @param language         the string that identifies the language used by the user interface
      * @param parametersValues the parameters values to connect to the easySDI v4 server
      */
-    public Easysdiv4(final String language, final Map<String, String> parametersValues) {
+    public GeoshopSitn(final String language, final Map<String, String> parametersValues) {
         this(language);
         this.inputs = parametersValues;
     }
@@ -186,15 +187,15 @@ public class Easysdiv4 implements IConnector {
 
 
     @Override
-    public final Easysdiv4 newInstance(final String language) {
-        return new Easysdiv4(language);
+    public final GeoshopSitn newInstance(final String language) {
+        return new GeoshopSitn(language);
     }
 
 
 
     @Override
-    public final Easysdiv4 newInstance(final String language, final Map<String, String> parametersValues) {
-        return new Easysdiv4(language, parametersValues);
+    public final GeoshopSitn newInstance(final String language, final Map<String, String> parametersValues) {
+        return new GeoshopSitn(language, parametersValues);
     }
 
 
@@ -267,6 +268,13 @@ public class Easysdiv4 implements IConnector {
         uploadSizeNode.put("req", false);
         uploadSizeNode.put("min", 1);
         uploadSizeNode.put("step", 1);
+        
+        ObjectNode externalUrlPatternNode = parametersNode.addObject();
+        externalUrlPatternNode.put("code", this.config.getProperty("code.detailsUrlPattern"));
+        externalUrlPatternNode.put("label", this.messages.getString("label.detailsUrlPattern"));
+        externalUrlPatternNode.put("type", "text");
+        externalUrlPatternNode.put("req", false);
+        externalUrlPatternNode.put("maxlength", 255);
 
         try {
             return mapper.writeValueAsString(parametersNode);
@@ -519,7 +527,7 @@ public class Easysdiv4 implements IConnector {
         ExportResult exportResult = new ExportResult();
         String responseString = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
 
-        if (httpCode != Easysdiv4.ACCEPTED_HTTP_STATUS_CODE && httpCode != Easysdiv4.CREATED_HTTP_STATUS_CODE && httpCode != Easysdiv4.SUCCESS_HTTP_STATUS_CODE) {
+        if (httpCode != GeoshopSitn.ACCEPTED_HTTP_STATUS_CODE && httpCode != GeoshopSitn.CREATED_HTTP_STATUS_CODE && httpCode != GeoshopSitn.SUCCESS_HTTP_STATUS_CODE) {
             this.logger.debug("setProduct has failed with HTTP code {} => return directly output", httpCode);
             exportResult.setSuccess(false);
             exportResult.setResultMessage(httpMessage);
@@ -850,12 +858,12 @@ public class Easysdiv4 implements IConnector {
 
                 case "http":
                     this.logger.debug("No port in URL for host {}. Using HTTP default 80.", hostName);
-                    port = Easysdiv4.DEFAULT_HTTP_PORT;
+                    port = GeoshopSitn.DEFAULT_HTTP_PORT;
                     break;
 
                 case "https":
                     this.logger.debug("No port in URL for host {}. Using HTTPS default 443.", hostName);
-                    port = Easysdiv4.DEFAULT_HTTPS_PORT;
+                    port = GeoshopSitn.DEFAULT_HTTPS_PORT;
                     break;
 
                 default:
@@ -922,15 +930,15 @@ public class Easysdiv4 implements IConnector {
         final String httpMessage = this.getMessageFromHttpCode(httpCode);
         this.logger.debug("Order HTTP request completed with status code {}.", httpCode);
 
-        if (httpCode != Easysdiv4.CREATED_HTTP_STATUS_CODE
-                && httpCode != Easysdiv4.SUCCESS_HTTP_STATUS_CODE
-                && httpCode != Easysdiv4.NO_CONTENT_HTTP_STATUS_CODE) {
+        if (httpCode != GeoshopSitn.CREATED_HTTP_STATUS_CODE
+                && httpCode != GeoshopSitn.SUCCESS_HTTP_STATUS_CODE
+                && httpCode != GeoshopSitn.NO_CONTENT_HTTP_STATUS_CODE) {
             this.logger.debug("getOrder has failed with HTTP code {} => return directly output", httpCode);
             result.setStatus(false);
             result.setErrorMessage(httpMessage);
 
             return result;
-        } else if (httpCode == Easysdiv4.NO_CONTENT_HTTP_STATUS_CODE) {
+        } else if (httpCode == GeoshopSitn.NO_CONTENT_HTTP_STATUS_CODE) {
             this.logger.debug("getOrder was successfull but with no content and HTTP code {}", httpCode);
             result.setStatus(true);
             result.setErrorMessage(this.messages.getString(String.format("httperror.message.%d", httpCode)));
@@ -969,6 +977,7 @@ public class Easysdiv4 implements IConnector {
             final ConnectorImportResult result) throws IOException {
 
         this.logger.debug("Building document");
+        final String detailsUrlPattern = this.inputs.get(this.config.getProperty("code.detailsUrlPattern"));
 
         JSONArray orderArray = new JSONArray(responseString);
 
@@ -996,6 +1005,7 @@ public class Easysdiv4 implements IConnector {
                 	+ tiersCompanyName + " " + ObjectUtils.firstNonNull(tiers.getString("email"), tiers.getString("phone"));
                 tiersAddress = tiers.getString("street") + ", " + tiers.getString("postcode") + " " + tiers.getString("city");
             }
+            String detailsUrl;
 
             this.logger.debug("Parsing products.");
             JSONArray productsArray = orderNode.getJSONArray("items");
@@ -1031,6 +1041,20 @@ public class Easysdiv4 implements IConnector {
                     "\"product_id\" : " + String.valueOf(catalogProductId) + "}");
                 product.setPerimeter(orderNode.getString("geom"));
                 product.setSurface(orderNode.getDouble("geom_area"));
+                
+                this.logger.debug("Creating order details URL.");
+                detailsUrl = null;
+
+                if (detailsUrlPattern != null && detailsUrlPattern.length() > 0) {
+                    this.logger.debug("Order details URL pattern is {}", detailsUrlPattern);
+                    detailsUrl = RequestUtils.interpolateVariables(detailsUrlPattern, product, this.config);
+
+                } else {
+                    this.logger.debug("No order details URL pattern defined.");
+                }
+                
+                product.setExternalUrl(detailsUrl);
+                this.logger.debug("Details URL set to {}", detailsUrl);
 
                 this.logger.debug("Adding product {} to result.", productId);
                 result.addProduct(product);

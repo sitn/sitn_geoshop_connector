@@ -16,8 +16,12 @@
  */
 package org.easysdi.extract.connectors.geoshop;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+import java.net.URL;
 import org.easysdi.extract.connectors.common.IProduct;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -28,12 +32,17 @@ import org.easysdi.extract.connectors.common.IProduct;
 public class Product implements IProduct {
 
     /**
+     * The writer to the application logs.
+     */
+    private final Logger logger = LoggerFactory.getLogger(ExportRequest.class);
+
+    /**
      * The description of the order that this request is part of.
      */
     private String orderLabel;
 
     /**
-     * The identifier of the order that this request is part of.
+     * The identifier of the order item that this request is part of.
      */
     private String orderGuid;
 
@@ -92,6 +101,11 @@ public class Product implements IProduct {
      * The size of the extract area in square meters.
      */
     private Double surface;
+
+    /**
+     * The address that provides an access to the details of this order on the originating server.
+     */
+    private String externalUrl;
 
     /**
      * Additional settings for the processing of this request.
@@ -333,6 +347,43 @@ public class Product implements IProduct {
      */
     public final void setSurface(final Double areaSize) {
         this.surface = areaSize;
+    }
+
+
+
+    @Override
+    public final String getExternalUrl() {
+        return this.externalUrl;
+    };
+
+
+
+    /**
+     * Defines the address that provides an access to the details of this order on the originating server.
+     *
+     * @param url the address of the order on the source server, or <code>null</code> if there is no such URL
+     */
+    public final void setExternalUrl(final String url) {
+
+        if (url == null) {
+            this.externalUrl = null;
+            return;
+        }
+
+        try {
+            URL inputAsUrl = new URL(url);
+
+            if (!inputAsUrl.toURI().isAbsolute()) {
+                this.logger.error("The external address for the order details must be absolute.");
+                this.externalUrl = null;
+            }
+
+            this.externalUrl = inputAsUrl.toString();
+
+        } catch (MalformedURLException | URISyntaxException exception) {
+            this.logger.error("The given external address is not a valid URL.", exception);
+            this.externalUrl = null;
+        }
     }
 
 
