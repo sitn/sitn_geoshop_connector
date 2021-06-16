@@ -142,7 +142,7 @@ public interface IProduct {
     Double getSurface();
 
 
-    
+
     /**
      * Obtains the address that provides an access to the details of this order on the originating server.
      *
