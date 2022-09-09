@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.easysdi.extract.plugins.common;
+package ch.asit_asso.extract.plugins.common;
 
 
 
@@ -34,6 +34,10 @@ public interface ITaskProcessorResult {
          * The task failed.
          */
         ERROR,
+        /**
+         * The task has not been able to run.
+         */
+        NOT_RUN,
         /**
          * The task requires an intervention by an operator.
          */

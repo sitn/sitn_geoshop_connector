@@ -14,16 +14,13 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.easysdi.extract.connectors;
+package ch.asit_asso.extract.connectors;
 
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.ServiceConfigurationError;
-import java.util.ServiceLoader;
-import org.easysdi.extract.connectors.common.IConnector;
+import java.util.*;
+
+import ch.asit_asso.extract.connectors.common.IConnector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

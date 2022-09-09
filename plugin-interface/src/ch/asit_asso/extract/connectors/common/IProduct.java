@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.easysdi.extract.connectors.common;
+package ch.asit_asso.extract.connectors.common;
 
 
 
@@ -112,6 +112,15 @@ public interface IProduct {
      * @return the name of the third party, or <code>null</code> if there is not any
      */
     String getTiers();
+
+
+
+    /**
+     * Obtains the string that uniquely identifies the person that this product was ordered on behalf of, if any.
+     *
+     * @return the identifier of the third party, or <code>null</code> if there is not any
+     */
+    String getTiersGuid();
 
 
 

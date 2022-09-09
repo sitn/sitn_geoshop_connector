@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.easysdi.extract.plugins;
+package ch.asit_asso.extract.plugins;
 
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -23,10 +23,9 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
-import org.easysdi.extract.plugins.common.ITaskProcessor;
+import ch.asit_asso.extract.plugins.common.ITaskProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 
 /**
