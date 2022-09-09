@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.easysdi.extract.connectors.geoshop;
+package ch.asit_asso.extract.connectors.geoshop;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -58,11 +58,11 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
-import org.easysdi.extract.connectors.common.IConnector;
-import org.easysdi.extract.connectors.common.IConnectorImportResult;
-import org.easysdi.extract.connectors.common.IExportRequest;
-import org.easysdi.extract.connectors.geoshop.utils.RequestUtils;
-import org.easysdi.extract.connectors.geoshop.utils.ZipUtils;
+import ch.asit_asso.extract.connectors.common.IConnector;
+import ch.asit_asso.extract.connectors.common.IConnectorImportResult;
+import ch.asit_asso.extract.connectors.common.IExportRequest;
+import ch.asit_asso.extract.connectors.geoshop.utils.RequestUtils;
+import ch.asit_asso.extract.connectors.geoshop.utils.ZipUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.slf4j.Logger;

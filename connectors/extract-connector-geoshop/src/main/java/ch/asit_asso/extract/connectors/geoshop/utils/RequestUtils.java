@@ -14,7 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.easysdi.extract.connectors.geoshop.utils;
+package ch.asit_asso.extract.connectors.geoshop.utils;
 
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Field;
@@ -22,8 +22,8 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
-import org.easysdi.extract.connectors.common.IProduct;
-import org.easysdi.extract.connectors.geoshop.ConnectorConfig;
+import ch.asit_asso.extract.connectors.common.IProduct;
+import ch.asit_asso.extract.connectors.geoshop.ConnectorConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

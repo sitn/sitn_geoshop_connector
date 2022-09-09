@@ -14,12 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-package org.easysdi.extract.connectors.geoshop;
+package ch.asit_asso.extract.connectors.geoshop;
 
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
-import org.easysdi.extract.connectors.common.IProduct;
+import ch.asit_asso.extract.connectors.common.IProduct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -403,5 +403,13 @@ public class Product implements IProduct {
     public final void setOthersParameters(final String parametersJson) {
         this.othersParameters = parametersJson;
     }
+
+
+
+	@Override
+	public String getTiersGuid() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 
 }
