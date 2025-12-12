@@ -113,6 +113,8 @@ public class LocalizedMessages {
                 String trimmedLang = lang.trim();
                 if (trimmedLang.matches(LocalizedMessages.LOCALE_VALIDATION_PATTERN)) {
                     this.allLanguages.add(trimmedLang);
+                } else {
+                    this.logger.warn("Invalid language code '{}' encountered in '{}'; skipping.", trimmedLang, languageCode);
                 }
             }
             this.logger.debug("Multiple languages configured: {}. Using cascading fallback: {}",
