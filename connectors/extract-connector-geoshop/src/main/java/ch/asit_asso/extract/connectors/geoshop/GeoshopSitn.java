@@ -83,6 +83,11 @@ public class GeoshopSitn implements IConnector {
     private static final String CONFIG_FILE_PATH = "connectors/geoshopsitn/properties/config.properties";
 
     /**
+     * The name of the file that contains the help text for this plugin.
+     */
+    private static final String HELP_FILE_NAME = "help.html";
+
+    /**
      * The status code returned to tell that an HTTP request resulted in the creation of a resource.
      */
     private static final int CREATED_HTTP_STATUS_CODE = 201;
@@ -137,7 +142,10 @@ public class GeoshopSitn implements IConnector {
      */
     private LocalizedMessages messages;
 
-
+    /**
+     * The text explaining the use of this plugin.
+     */
+    private String help;
 
     /**
      * Creates a new easySDI v4 connector plugin instance with default parameters.
@@ -223,7 +231,12 @@ public class GeoshopSitn implements IConnector {
 
     @Override
     public final String getHelp() {
-        return this.messages.getString("plugin.help");
+
+        if (this.help == null) {
+            this.help = this.messages.getFileContent(GeoshopSitn.HELP_FILE_NAME);
+        }
+
+        return this.help;
     }
 
 

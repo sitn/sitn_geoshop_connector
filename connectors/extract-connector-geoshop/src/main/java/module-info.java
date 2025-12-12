@@ -17,6 +17,5 @@ module ch.asit_asso.extract.connectors.geoshop {
     requires org.apache.httpcomponents.httpcore;
     requires org.apache.httpcomponents.httpmime;
     requires org.slf4j;
-    requires logback.classic;
-	requires json;
+	requires org.json;
 }

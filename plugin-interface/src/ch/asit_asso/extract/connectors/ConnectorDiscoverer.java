@@ -16,9 +16,16 @@
  */
 package ch.asit_asso.extract.connectors;
 
+import java.lang.module.Configuration;
+import java.lang.module.ModuleDescriptor;
+import java.lang.module.ModuleFinder;
+import java.lang.module.ModuleReference;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import ch.asit_asso.extract.connectors.common.IConnector;
 import org.slf4j.Logger;
