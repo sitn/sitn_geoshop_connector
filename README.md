@@ -4,7 +4,7 @@ This connector is meant to connect [geoshop](https://github.com/camptocamp/geosh
 
 ## How to use
 
-Downlaod the JAR file from a released version and paste it into your installed Extract in `WEB-INF/classes/connectors`
+Download the JAR file from a released version and paste it into your installed Extract in `WEB-INF/classes/connectors`
 
 ## Dev environement
 
