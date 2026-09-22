@@ -44,6 +44,17 @@ public interface IProduct {
 
 
     /**
+     * Obtains the description entered by the customer for the order that this product is a part of.
+     *
+     * @return the order description, or <code>null</code> if there is not any
+     */
+    default String getOrderDescription() {
+        return null;
+    }
+
+
+
+    /**
      * Obtains the identifier of this product.
      *
      * @return the string that identifies this product on the server where it was ordered
