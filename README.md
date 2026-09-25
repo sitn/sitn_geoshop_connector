@@ -15,13 +15,18 @@ Download the JAR file from a released version and paste it into your installed E
 
 ### Build
 
-First install the plugin interface:
+1. Change the version in `connectors/extract-connector-geoshop/pom.xml`
+
+2. Install the plugin interface:
 
 ```powershell
 cd plugin-interface
 mvn clean install
 ```
 
+3. Then build the jar
+
 ```powershell
 cd connectors/extract-connector-geoshop
+mvn clean install
 ```
