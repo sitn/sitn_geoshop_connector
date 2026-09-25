@@ -47,11 +47,6 @@ public class Product implements IProduct {
     private String orderGuid;
 
     /**
-     * The description entered by the customer for the order that this request is part of.
-     */
-    private String orderDescription;
-
-    /**
      * The identifier of the requested data item.
      */
     private String productGuid;
@@ -151,24 +146,6 @@ public class Product implements IProduct {
      */
     public final void setOrderGuid(final String guid) {
         this.orderGuid = guid;
-    }
-
-
-
-    @Override
-    public final String getOrderDescription() {
-        return this.orderDescription;
-    }
-
-
-
-    /**
-     * Defines the description entered by the customer for the order that this product request is part of.
-     *
-     * @param description the order description
-     */
-    public final void setOrderDescription(final String description) {
-        this.orderDescription = description;
     }
 
 

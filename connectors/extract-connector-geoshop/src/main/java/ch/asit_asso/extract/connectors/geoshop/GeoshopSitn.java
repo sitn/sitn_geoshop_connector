@@ -1000,7 +1000,6 @@ public class GeoshopSitn implements IConnector {
             JSONObject orderNode = orderArray.getJSONObject(i);
             final int orderId = orderNode.getInt("id");
             String orderLabel = String.valueOf(orderId) + " - " + orderNode.getString("title");
-            String orderDescription = orderNode.optString("description", "");
             String orderType = orderNode.getString("order_type");
 
             JSONObject client = orderNode.getJSONObject("client");
@@ -1040,7 +1039,6 @@ public class GeoshopSitn implements IConnector {
 
                 product.setOrderGuid(String.valueOf(orderId));
                 product.setOrderLabel(orderLabel);
-                product.setOrderDescription(orderDescription);
                 product.setOrganismGuid(productOrganismGuid);
                 product.setOrganism(clientOrganism);
                 product.setClient(clientName);
